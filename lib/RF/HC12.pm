@@ -19,7 +19,7 @@ sub new {
 
     croak "new() requires a serial device path sent in" if ! defined $dev;
 
-    my $eol = defined $eol ? $eol : EOL;
+    $eol = defined $eol ? $eol : EOL;
     my $self = bless {
         eol => $eol,
     }, $class;
@@ -41,11 +41,11 @@ sub baud {
     my ($self, $baud) = @_;
 
     if (defined $baud){
-        if (! $self->_valid_baud($baud)){
+        if (! $self->baud_rates($baud)){
             croak "baud rate '$baud' is invalid. See the documentation";
         }
-        my $cmd = 'B$baud';
-        $self->_serial->puts($cmd);
+        my $cmd = "B$baud";
+        $self->_set_control($cmd);
     }
     return $self->_fetch_control('B');
 }
@@ -94,6 +94,10 @@ sub channel {
     }
     return $self->_fetch_control('C');
 }
+sub _set_control {
+    my ($self, $control) = @_;
+    $self->_serial->puts("AT+$control");
+}
 sub _fetch_control {
     my ($self, $control) = @_;
 
@@ -138,7 +142,7 @@ sub _eol {
     my ($self) = @_;
     return $self->{eol};
 }
-sub _valid_baud {
+sub baud_rates {
     my ($self, $baud) = @_;
 
     my $baud_rates = {
@@ -151,6 +155,8 @@ sub _valid_baud {
         57600   => 1,
         115200  => 1,
     };
+
+    return sort {$a <=> $b}(keys(%$baud_rates)) if ! defined $baud;
 
     return $baud_rates->{$baud} ? 1 : 0;
 }
