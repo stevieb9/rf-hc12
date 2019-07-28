@@ -15,11 +15,14 @@ use constant {
 };
 
 sub new {
-    my ($class, $dev) = @_;
+    my ($class, $dev, $eol) = @_;
 
     croak "new() requires a serial device path sent in" if ! defined $dev;
 
-    my $self = bless {}, $class;
+    my $eol = defined $eol ? $eol : EOL;
+    my $self = bless {
+        eol => $eol,
+    }, $class;
     $self->_serial($dev, COMM_BAUD);
     return $self;
 }
@@ -111,7 +114,7 @@ sub _fetch_control {
             my $char = $self->_serial->getc;
             $read .= chr $char;
 
-            if (hex(sprintf("%x", $char)) == EOL){
+            if (hex(sprintf("%x", $char)) == $self->_eol){
                 print ">$read" if DEBUG_FETCH;
 
                 if ($control eq 'AT'){
@@ -131,7 +134,10 @@ sub _fetch_control {
         }
     }
 }
-
+sub _eol {
+    my ($self) = @_;
+    return $self->{eol};
+}
 sub _valid_baud {
     my ($self, $baud) = @_;
 
