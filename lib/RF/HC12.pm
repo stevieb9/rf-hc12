@@ -11,6 +11,7 @@ our $VERSION = '0.01';
 use constant {
     COMM_BAUD   => 9600,
     EOL         => 0x0A,
+    DEBUG_FETCH => 0,
 };
 
 sub new {
@@ -45,6 +46,39 @@ sub baud {
     }
     return $self->_fetch_control('B');
 }
+sub power {
+    my ($self, $tp) = @_;
+
+    if (defined $tp){
+        if (! $self->_valid_power($tp)){
+            croak "transmit power '$tp' is invalid. See the documentation";
+        }
+        my $cmd = 'P$tp';
+        $self->_serial->puts($cmd);
+    }
+    return $self->_fetch_control('P');
+}
+sub mode {
+    my ($self, $mode) = @_;
+
+    if (defined $mode){
+        if (! $self->_valid_baud($mode)){
+            croak "functional mode'$mode' is invalid. See the documentation";
+        }
+        my $cmd = 'FU$mode';
+        $self->_serial->puts($cmd);
+    }
+    return $self->_fetch_control('FU');
+}
+sub version {
+    my ($self, $ver) = @_;
+
+    if (defined $ver){
+        croak "hardware version isn't something that can be set";
+    }
+
+    return $self->_fetch_control('V');
+}
 sub channel {
      my ($self, $channel) = @_;
 
@@ -63,24 +97,34 @@ sub _fetch_control {
     if ($control eq 'AT'){
         $self->_serial->puts($control);
     }
+    elsif ($control eq 'V'){
+        $self->_serial->puts('AT+V');
+    }
     else {
         $self->_serial->puts("AT+R$control");
     }
 
     my $read;
-  
+
     while (1){
         if ($self->_serial->avail){
             my $char = $self->_serial->getc;
             $read .= chr $char;
 
             if (hex(sprintf("%x", $char)) == EOL){
+                print ">$read" if DEBUG_FETCH;
+
                 if ($control eq 'AT'){
                     if ($read =~ /(OK)/){
                         return $1;
                     }
                 }
-                if ($read =~ /.*?(\d+)/){
+                if ($control eq 'V'){
+                     if ($read =~ /.*?(HC.*\d+)/){
+                        return $1;
+                    }
+                }
+                if ($read =~ /^OK\+.+?([+-]?\d+)/){
                     return $1;
                 }
             }
@@ -128,38 +172,3 @@ under the terms of the the Artistic License (2.0). You may obtain a
 copy of the full license at:
 
 L<http://www.perlfoundation.org/artistic_license_2_0>
-
-Any use, modification, and distribution of the Standard or Modified
-Versions is governed by this Artistic License. By using, modifying or
-distributing the Package, you accept this license. Do not use, modify,
-or distribute the Package, if you do not accept this license.
-
-If your Modified Version has been derived from a Modified Version made
-by someone other than you, you are nevertheless required to ensure that
-your Modified Version complies with the requirements of this license.
-
-This license does not grant you the right to use any trademark, service
-mark, tradename, or logo of the Copyright Holder.
-
-This license includes the non-exclusive, worldwide, free-of-charge
-patent license to make, have made, use, offer to sell, sell, import and
-otherwise transfer the Package with respect to any patent claims
-licensable by the Copyright Holder that are necessarily infringed by the
-Package. If you institute patent litigation (including a cross-claim or
-counterclaim) against any party alleging that the Package constitutes
-direct or contributory patent infringement, then this Artistic License
-to you shall terminate on the date that such litigation is filed.
-
-Disclaimer of Warranty: THE PACKAGE IS PROVIDED BY THE COPYRIGHT HOLDER
-AND CONTRIBUTORS "AS IS' AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES.
-THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
-PURPOSE, OR NON-INFRINGEMENT ARE DISCLAIMED TO THE EXTENT PERMITTED BY
-YOUR LOCAL LAW. UNLESS REQUIRED BY LAW, NO COPYRIGHT HOLDER OR
-CONTRIBUTOR WILL BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR
-CONSEQUENTIAL DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THE PACKAGE,
-EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-
-=cut
-
-1; # End of RF::HC12
