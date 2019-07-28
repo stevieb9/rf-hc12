@@ -17,10 +17,19 @@ if ($rf->test ne 'OK'){
 
 for ($rf->baud_rates){
     $rf->baud($_);
-    is $rf->baud, $_, "baud rate set to $_ ok";
+    is $rf->baud, "OK+B$_", "baud rate set to $_ ok";
 }
 
-is $rf->baud(9600), 9600, "baud set back to default ok";
+for (qw(1 a A ! 1111 9999)){
+    is
+        eval { $rf->baud($_); 1; },
+        undef,
+        "baud croaks if sent in $_";
+
+    like $@, qr/baud rate '$_' is invalid/, "...and error is sane";
+}
+
+is $rf->baud(9600), 'OK+B9600', "baud set back to default ok";
 
 #is $rf->channel, '001', "default channel (001) is ok";
 #is $rf->mode, 3, "default functional mode (3) is ok";

@@ -44,10 +44,10 @@ sub baud {
         if (! $self->baud_rates($baud)){
             croak "baud rate '$baud' is invalid. See the documentation";
         }
-        my $cmd = "B$baud";
+        my $cmd = "AT+B$baud";
         $self->_set_control($cmd);
     }
-    return $self->_fetch_control('B');
+    return $self->_fetch_control('AT+RB');
 }
 sub power {
     my ($self, $tp) = @_;
@@ -56,10 +56,10 @@ sub power {
         if (! $self->_valid_power($tp)){
             croak "transmit power '$tp' is invalid. See the documentation";
         }
-        my $cmd = 'P$tp';
+        my $cmd = 'AT+P$tp';
         $self->_serial->puts($cmd);
     }
-    return $self->_fetch_control('P');
+    return $self->_fetch_control('AT+RP');
 }
 sub mode {
     my ($self, $mode) = @_;
@@ -68,10 +68,10 @@ sub mode {
         if (! $self->_valid_baud($mode)){
             croak "functional mode'$mode' is invalid. See the documentation";
         }
-        my $cmd = 'FU$mode';
+        my $cmd = 'AT+FU$mode';
         $self->_serial->puts($cmd);
     }
-    return $self->_fetch_control('FU');
+    return $self->_fetch_control('AT+RF');
 }
 sub version {
     my ($self, $ver) = @_;
@@ -80,7 +80,7 @@ sub version {
         croak "hardware version isn't something that can be set";
     }
 
-    return $self->_fetch_control('V');
+    return $self->_fetch_control('AT+V');
 }
 sub channel {
      my ($self, $channel) = @_;
@@ -89,53 +89,31 @@ sub channel {
         if (! $self->_valid_channel($channel)){
             croak "channel '$channel' is invalid. See the documentation";
         }
-        my $cmd = 'C$channel';
+        my $cmd = 'AT+C$channel';
         $self->_serial->puts($cmd);
     }
-    return $self->_fetch_control('C');
+    return $self->_fetch_control('AT+RC');
 }
 sub _set_control {
     my ($self, $control) = @_;
-    $self->_serial->puts("AT+$control");
+    $self->_serial->puts("$control");
 }
 sub _fetch_control {
     my ($self, $control) = @_;
 
-    if ($control eq 'AT'){
-        $self->_serial->puts($control);
-    }
-    elsif ($control eq 'V'){
-        $self->_serial->puts('AT+V');
-    }
-    else {
-        $self->_serial->puts("AT+R$control");
-    }
+    $self->_serial->puts($control);
 
     my $read;
 
     while (1){
-        if ($self->_serial->avail){
-            my $char = $self->_serial->getc;
-            $read .= chr $char;
+        select(undef,undef,undef,0.07); # wait for serial to normalize
 
-            if (hex(sprintf("%x", $char)) == $self->_eol){
-                print ">$read" if DEBUG_FETCH;
-
-                if ($control eq 'AT'){
-                    if ($read =~ /(OK)/){
-                        return $1;
-                    }
-                }
-                if ($control eq 'V'){
-                     if ($read =~ /.*?(HC.*\d+)/){
-                        return $1;
-                    }
-                }
-                if ($read =~ /^OK\+.+?([+-]?\d+)/){
-                    return $1;
-                }
-            }
+        if ($self->_serial->avail) {
+            $read .= $self->_serial->gets($self->_serial->avail);
+            chomp $read;
+            return $read;
         }
+
     }
 }
 sub _eol {
