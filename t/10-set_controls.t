@@ -19,6 +19,9 @@ for ($rf->baud_rates){
     $rf->baud($_);
     is $rf->baud, $_, "baud rate set to $_ ok";
 }
+
+is $rf->baud(9600), 9600, "baud set back to default ok";
+
 #is $rf->channel, '001', "default channel (001) is ok";
 #is $rf->mode, 3, "default functional mode (3) is ok";
 #is $rf->power, '+20', "default transmit power (+20db) ok";
