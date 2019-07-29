@@ -106,14 +106,19 @@ sub _fetch_control {
     my $read;
 
     while (1){
-        select(undef,undef,undef,0.07); # wait for serial to normalize
+        if ($self->_serial->avail){
+            my $char = $self->_serial->getc;
 
-        if ($self->_serial->avail) {
-            $read .= $self->_serial->gets($self->_serial->avail);
-            chomp $read;
-            return $read;
+            if (hex(sprintf("%x", $char)) == 0x0D){
+                next;
+            }
+
+            if (hex(sprintf("%x", $char)) == 0x0A){
+                return $read;
+            }
+
+            $read .= chr $char;
         }
-
     }
 }
 sub _eol {
