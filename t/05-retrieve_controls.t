@@ -5,7 +5,11 @@ use feature 'say';
 use RF::HC12;
 use Test::More;
 
-my $dev = '/dev/ttyUSB0';
+if (! $ENV{UART_DEV}){
+    plan skip_all => "UART_DEV env var not set";
+}
+
+my $dev = $ENV{UART_DEV};
 
 my $rf = RF::HC12->new($dev);
 
