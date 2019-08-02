@@ -31,7 +31,7 @@ WriteMakefile(
         'Test::More' => '0',
     },
     PREREQ_PM => {
-        'RPi::Serial'       => 0,
+        'RPi::Serial'       => 2.99,
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'RF-HC12-*' },

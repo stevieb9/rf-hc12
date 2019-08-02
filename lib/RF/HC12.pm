@@ -8,9 +8,6 @@ use RPi::Serial;
 
 our $VERSION = '0.01';
 
-require XSLoader;
-XSLoader::load('RPi::HC12', $VERSION);
-
 use constant {
     COMM_BAUD   => 9600,
     EOL         => 0x0A,
