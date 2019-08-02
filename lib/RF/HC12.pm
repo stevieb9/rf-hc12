@@ -65,11 +65,11 @@ sub mode {
     my ($self, $mode) = @_;
 
     if (defined $mode){
-        if (! $self->_valid_baud($mode)){
-            croak "functional mode'$mode' is invalid. See the documentation";
+        if (! grep {$mode == $_} (1, 2, 3)){
+            croak "functional mode'$mode' is invalid. Values are 1, 2 or 3";
         }
-        my $cmd = 'AT+FU$mode';
-        $self->_serial->puts($cmd);
+        my $cmd = "AT+FU$mode";
+        $self->_set_control($cmd);
     }
     return $self->_fetch_control('AT+RF');
 }
