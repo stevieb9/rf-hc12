@@ -121,7 +121,7 @@ int tty_open(const char* serialport, int baud){
     return fd;
 }
 
-MODULE = inline_pl_b197  PACKAGE = main  
+MODULE = RPi::HC12  PACKAGE = RPi::HC12
 
 PROTOTYPES: DISABLE
 
