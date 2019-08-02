@@ -83,14 +83,19 @@ sub version {
     return $self->_fetch_control('AT+V');
 }
 sub channel {
-     my ($self, $channel) = @_;
+    my ($self, $channel) = @_;
 
     if (defined $channel){
-        if (! $self->_valid_channel($channel)){
-            croak "channel '$channel' is invalid. See the documentation";
+        if (! grep {$channel == $_} (1..127)){
+            croak "channel '$channel' is invalid. Values are 1-127";
         }
-        my $cmd = 'AT+C$channel';
-        $self->_serial->puts($cmd);
+
+        # pad out zeros to the left to make 3 chars
+        my $pad = 3 - length($channel);
+        $channel = 0 x $pad . $channel;
+
+        my $cmd = "AT+C$channel";
+        $self->_set_control($cmd);
     }
     return $self->_fetch_control('AT+RC');
 }
