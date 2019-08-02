@@ -53,11 +53,11 @@ sub power {
     my ($self, $tp) = @_;
 
     if (defined $tp){
-        if (! $self->_valid_power($tp)){
+        if (! $self->power_rates($tp)){
             croak "transmit power '$tp' is invalid. See the documentation";
         }
-        my $cmd = 'AT+P$tp';
-        $self->_serial->puts($cmd);
+        my $cmd = "AT+P$tp";
+        $self->_set_control($cmd);
     }
     return $self->_fetch_control('AT+RP');
 }
@@ -142,6 +142,23 @@ sub baud_rates {
     return sort {$a <=> $b}(keys(%$baud_rates)) if ! defined $baud;
 
     return $baud_rates->{$baud} ? 1 : 0;
+}
+sub power_rates {
+    my ($self, $rate) = @_;
+
+    my $power_rates = {
+        1   => -1,
+        2   => 2,
+        3   => 5,
+        4   => 8,
+        5   => 11,
+        6   => 14,
+        7   => 17,
+        8   => 20
+    };
+
+    return %$power_rates if ! defined $rate;
+    return $power_rates->{$rate} ? 1 : 0;
 }
 1;
 __END__
