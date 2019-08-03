@@ -198,12 +198,19 @@ RF::HC12 - Interface to the 433 MHz HC-12 Radio Frequency serial transceivers
 
 Interfaces with the HC-12 433MHz Radio Frequency serial data transceivers.
 
-B<NOTE>: Currently, this distribution can only be used to configure the devices,
-in the future, I'll incorporate the ability to use it to actually communicate
-between them.
-
 B<NOTE>: The C<HC-12> transceivers are designed to operate in pairs. The
 settings on one device must match the other device or communication will fail.
+
+B<PI ZERO-W NOTE>: On the Pi Zero W (and possibly other devices), if you get
+extra newline-type characters on receive, you may have to configure the serial
+port to stop the UART from transliterating Carriage Return characters into
+New Line characters.
+
+    stty -F /dev/ttyS0 -ircnl
+
+To re-enable:
+
+    stty -F /dev/ttyS0 ircnl
 
 =head1 SYNOPSIS
 
