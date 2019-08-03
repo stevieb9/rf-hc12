@@ -6,7 +6,7 @@ use warnings;
 use Carp qw(croak);
 use RPi::Serial;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use constant {
     COMM_BAUD   => 9600,
