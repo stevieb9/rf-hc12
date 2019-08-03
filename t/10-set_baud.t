@@ -18,7 +18,7 @@ if ($rf->test ne 'OK'){
     plan skip_all => "HC-12 CONN TEST FAILED... CAN'T CONTINUE";
 }
 
-for ($rf->baud_rates){
+for ($rf->_baud_rates){
     $rf->baud($_);
     is $rf->baud, "OK+B$_", "baud rate set to $_ ok";
 }

@@ -18,13 +18,13 @@ if ($rf->test ne 'OK'){
     plan skip_all => "HC-12 CONN TEST FAILED... CAN'T CONTINUE";
 }
 
-like $rf->baud(9600), qr/9600/, "baud set back to default ok";
-like $rf->channel(1), qr/001/, "channel set back to default ok";
-like $rf->mode(3), qr/FU3/, "transmit mode set back to default ok";
-$rf->power(8);
-like $rf->power, qr/20dBm/, "power set back to default ok";
+is $rf->sleep, 'OK+SLEEP', "device is sleeping";
 
-my $defaults = $rf->defaults;
+sleep 1;
+
+is $rf->wake, 'OK', "device is awake again";
+
+my $defaults = $rf->config;
 
 like $defaults, qr/B9600/, "all defaults in one call ok";
 like $defaults, qr/RC001/, "all defaults in one call ok";
