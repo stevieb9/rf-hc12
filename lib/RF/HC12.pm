@@ -192,7 +192,7 @@ __END__
 
 =head1 NAME
 
-RF::HC12 - Interface to the 433 MHz HC-12 Radio Frequency serial trancievers
+RF::HC12 - Interface to the 433 MHz HC-12 Radio Frequency serial transceivers
 
 =head1 DESCRIPTION
 
