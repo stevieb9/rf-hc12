@@ -101,7 +101,7 @@ sub channel {
 }
 sub _set_control {
     my ($self, $control) = @_;
-    $self->_serial->puts("$control");
+    $self->_serial->puts($control);
 }
 sub _fetch_control {
     my ($self, $control) = @_;
@@ -123,6 +123,26 @@ sub _fetch_control {
             }
 
             $read .= chr $char;
+        }
+    }
+}
+sub defaults {
+    my ($self) = @_;
+
+    $self->_serial->puts('AT+RX');
+
+    my ($read, $line_count);
+
+    while (1){
+        if ($self->_serial->avail){
+            my $char = $self->_serial->getc;
+
+            $read .= chr $char;
+            if (hex(sprintf("%x", $char)) == 0x0A){
+                $line_count++;
+                return $read if $line_count == 4;
+            }
+
         }
     }
 }

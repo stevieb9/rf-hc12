@@ -44,17 +44,3 @@ $rf->power(8);
 like $rf->power, qr/20dBm/, "back to default +20dBm";
 
 done_testing();
-exit;
-
-for (qw(1 a A ! 1111 9999)){
-    is
-        eval { $rf->baud($_); 1; },
-        undef,
-        "baud croaks if sent in $_";
-
-    like $@, qr/baud rate '$_' is invalid/, "...and error is sane";
-}
-
-is $rf->baud(9600), 'OK+B9600', "baud set back to default ok";
-
-done_testing();
